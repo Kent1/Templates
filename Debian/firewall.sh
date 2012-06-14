@@ -31,7 +31,6 @@ IPBAN="/root/ipban"
 ############
 
 IPT=`which iptables`
-IPCLIENT=`echo $SSH_CLIENT | sed 's/\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\).*/\1/'`
 
 color="\\033[0;34m"
 end="\\033[0m"
@@ -40,9 +39,9 @@ print () {
     printf "[$color*$end] $* \n"
 }
 
-#modprobe nf_conntrack
-#modprobe ip_conntrack
-#modprobe ipt_LOG
+modprobe nf_conntrack
+modprobe ip_conntrack
+modprobe ipt_LOG
 
 case "$1" in
 start)
@@ -57,13 +56,8 @@ start)
     $IPT -P FORWARD ACCEPT
 
     # on nettoie
-    $IPT -F INPUT
-    $IPT -F OUTPUT
-    $IPT -F FORWARD
-    $IPT -F LOG_DROP 2> /dev/null
-    $IPT -X LOG_DROP 2> /dev/null
-    $IPT -F FLOOD 2> /dev/null
-    $IPT -X FLOOD 2> /dev/null
+    $IPT -F
+    $IPT -X
     print "Clearing previous entries."
 
     # on fait pointer par défaut sur DROP
@@ -78,8 +72,8 @@ start)
     print "local machine is safe."
 
     # On autorise les connexions existantes ou relayés
-    #$IPT -A INPUT -s ${IPCLIENT} -m state --state ESTABLISHED,RELATED -j ACCEPT
-    #$IPT -A OUTPUT -d ${IPCLIENT} -m state --state ESTABLISHED,RELATED -j ACCEPT
+    $IPT -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    $IPT -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
     # On se protège des scan de port
     $IPT -A INPUT -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m limit --limit 1/s -j ACCEPT
@@ -103,6 +97,10 @@ start)
     # On autorise de pinger d'autres machines.
     $IPT -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
     $IPT -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
+
+    #Accepter le protocole ICMP
+    $IPT -A INPUT -p icmp --icmp-type destination-unreachable -j ACCEPT
+    $IPT -A INPUT -p icmp --icmp-type time-exceeded -j ACCEPT
 
     # Ignore ping
     #echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
@@ -182,6 +180,12 @@ start)
     $IPT -A OUTPUT -p tcp --dport 1024:65535 --sport 1024:65535 -m state --state RELATED,ESTABLISHED -j ACCEPT
     print "Open FTP Client."
 
+    # Client IRC
+    $IPT -A OUTPUT -p tcp --dport 6667 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+    #$IPT -A INPUT -p udp --sport 133 -j ACCEPT # identification port
+    #$IPT -A OUTPUT -p udp --dport 133 -j ACCEPT # identification port
+    print "Open IRC Client."
+
     #########################
     # Ports supplémentaires #
     #########################
@@ -225,14 +229,14 @@ start)
     # logs #
     ########
 
-    $IPT -N LOG_DROP 2> /dev/null
+    $IPT -N LOG_DROP
     $IPT -A LOG_DROP -j LOG --log-prefix '[IPTABLES - DROP] : ' --log-level debug
     $IPT -A LOG_DROP -j DROP
     $IPT -t filter -A INPUT -j LOG_DROP
     $IPT -t filter -A OUTPUT -j LOG_DROP
     $IPT -t filter -A FORWARD -j LOG_DROP
 
-    $IPT -N FLOOD 2> /dev/null
+    $IPT -N FLOOD
     $IPT -A FLOOD -m limit --limit 1/s --limit-burst 20 -j RETURN
     $IPT -A FLOOD -j LOG --log-prefix "[IPTABLES - SYN flood] : "
     $IPT -A FLOOD -j DROP
@@ -242,13 +246,8 @@ start)
 
 stop)
 
-    $IPT -F INPUT
-    $IPT -F OUTPUT
-    $IPT -F FORWARD
-    $IPT -F LOG_DROP 2> /dev/null
-    $IPT -X LOG_DROP 2> /dev/null
-    $IPT -F FLOOD 2> /dev/null
-    $IPT -X FLOOD 2> /dev/null
+    $IPT -F
+    $IPT -X
     $IPT -P INPUT ACCEPT
     $IPT -P OUTPUT ACCEPT
     $IPT -P FORWARD ACCEPT
