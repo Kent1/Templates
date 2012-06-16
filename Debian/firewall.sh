@@ -130,8 +130,8 @@ start)
     print "Open SSH Server."
 
     # Serveur SMTP
-    #$IPT -A OUTPUT -p tcp --dport 25 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
-    #$IPT -A INPUT -p tcp --sport 25 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A OUTPUT -p tcp --dport 25 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A INPUT -p tcp --sport 25 -m state --state RELATED,ESTABLISHED -j ACCEPT
     #print "Open SMTP."
 
     # Client DNS
@@ -152,8 +152,8 @@ start)
     print "Open Whois."
 
     # Serveur Web (http et https)
-    #$IPT -A INPUT -p tcp --dport 80 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
-    #$IPT -A OUTPUT -p tcp --sport 80 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A INPUT -p tcp --dport 80 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A OUTPUT -p tcp --sport 80 -m state --state RELATED,ESTABLISHED -j ACCEPT
     #$IPT -A INPUT -p tcp --dport 443 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
     #$IPT -A OUTPUT -p tcp --sport 443 -m state --state RELATED,ESTABLISHED -j ACCEPT
     #print "Open Web Server."
