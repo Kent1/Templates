@@ -161,6 +161,8 @@ start)
     # Client Web (pour apt-get par exemple)
     $IPT -A INPUT -p tcp --sport 80 -m state --state RELATED,ESTABLISHED -j ACCEPT
     $IPT -A OUTPUT -p tcp --dport 80 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A INPUT -p tcp --sport 443 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A OUTPUT -p tcp --dport 443 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
     print "Open Web Client."
 
     # Serveur FTP (ftp et ftp-data)
@@ -185,6 +187,12 @@ start)
     #$IPT -A INPUT -p udp --sport 133 -j ACCEPT # identification port
     #$IPT -A OUTPUT -p udp --dport 133 -j ACCEPT # identification port
     print "Open IRC Client."
+
+    # rTorrent
+    $IPT -A INPUT -p tcp --dport 6890:6999 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A INPUT -p udp --dport 6881 -j ACCEPT
+    $IPT -A INPUT -p tcp --dport 1024:65535 --sport 1024:65535 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+    $IPT -A OUTPUT -p tcp --dport 1024:65535 --sport 1024:65535 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
 
     #########################
     # Ports supplémentaires #
