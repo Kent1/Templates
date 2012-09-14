@@ -1,9 +1,8 @@
-deb http://ftp.belnet.be/debian/ squeeze main
-deb-src http://ftp.belnet.be/debian/ squeeze main
+deb http://ftp.belnet.be/debian/ wheezy main contrib non-free
+deb-src http://ftp.belnet.be/debian/ wheezy main contrib non-free
 
-deb http://security.debian.org/ squeeze/updates main
-deb-src http://security.debian.org/ squeeze/updates main
+#deb http://ftp.be.debian.org/debian/ wheezy main contrib non-free
 
-# squeeze-updates, previously known as 'volatile'
-deb http://ftp.belnet.be/debian/ squeeze-updates main
-deb-src http://ftp.belnet.be/debian/ squeeze-updates main
+deb http://security.debian.org/ wheezy/updates main contrib non-free
+deb-src http://security.debian.org/ wheezy/updates main contrib non-free
+
